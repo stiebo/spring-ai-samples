@@ -1,0 +1,5 @@
+/.idea/
+/.mvn/
+.gitattributes
+mvnw
+mvnw.cmd
