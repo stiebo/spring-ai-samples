@@ -1,7 +1,8 @@
-/.idea/
-/.mvn/
-/target/
+.gradle
+.idea
+build
+gradle
 .gitattributes
-mvnw
-mvnw.cmd
-/src/main/resources/prompts/flashcardscsvprompt.st.bk
+gradlew
+gradlew.bat
+HELP.md
