@@ -4,7 +4,6 @@ import dev.stiebo.openaiutils.dto.CVDataOutDto;
 import dev.stiebo.openaiutils.exception.FileErrorException;
 import dev.stiebo.openaiutils.service.CVService;
 import dev.stiebo.openaiutils.service.FlashcardService;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

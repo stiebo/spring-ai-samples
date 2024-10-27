@@ -2,7 +2,6 @@ package dev.stiebo.openaiutils.service.impl;
 
 import dev.stiebo.openaiutils.service.ChatClientService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -15,8 +14,6 @@ import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
