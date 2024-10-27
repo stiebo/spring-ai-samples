@@ -50,8 +50,10 @@ public class FlashcardServiceImpl implements FlashcardService {
     private byte[] convertToCsv(Flashcards flashcards) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              OutputStreamWriter osw = new OutputStreamWriter(baos);
-             CSVPrinter csvPrinter = new CSVPrinter(osw, CSVFormat.DEFAULT.withDelimiter('\t'))) {
-
+             CSVPrinter csvPrinter = new CSVPrinter(osw,
+                     CSVFormat.Builder.create()
+                             .setDelimiter('\t')
+                             .build())) {
             for (Flashcard flashcard : flashcards.flashcards()) {
                 csvPrinter.printRecord(flashcard.question(), flashcard.answer());
             }
