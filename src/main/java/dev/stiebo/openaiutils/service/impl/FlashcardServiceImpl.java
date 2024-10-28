@@ -40,14 +40,15 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     public List<Flashcard> createFlashcardsFromFile(MultipartFile file) {
-        Flashcards flashcards = switch (file.getContentType()) {
+        String contentType = getContentTypeOrThrowException(file);
+        Flashcards flashcards = switch (contentType) {
             // call chatClient with (Image-)Resource
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
                     Flashcards.class, flashcardsCsvPrompt, utilityService.convertImageFileToResource(file));
             // call with (String-)document
             case "application/pdf" -> chatClientService.getResponse(
                     Flashcards.class, flashcardsCsvPrompt, utilityService.convertPdfToText(file));
-            case null, default -> throw new FileErrorException("Invalid File Type");
+            default -> throw new IllegalStateException("Unexpected value: " + contentType);
         };
         return flashcards.flashcards();
     }
@@ -68,4 +69,28 @@ public class FlashcardServiceImpl implements FlashcardService {
             throw new RuntimeException("Error converting to csv");
         }
     }
+
+    private String getContentTypeOrThrowException(MultipartFile file) throws FileErrorException {
+        return switch (file.getContentType()) {
+            case "image/jpeg", "image/gif", "image/png", "application/pdf" -> file.getContentType();
+            case null, default -> {
+                // Fallback: determine the content type based on file extension
+                String fileName = file.getOriginalFilename();
+                if (fileName != null) {
+                    if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+                        yield "image/jpeg";
+                    } else if (fileName.endsWith(".gif")) {
+                        yield "image/gif";
+                    } else if (fileName.endsWith(".png")) {
+                        yield "image/png";
+                    } else if (fileName.endsWith(".pdf")) {
+                        yield "application/pdf";
+                    }
+                }
+                throw new FileErrorException("Invalid File Type: " + file.getContentType());
+            }
+        };
+    }
+
+
 }

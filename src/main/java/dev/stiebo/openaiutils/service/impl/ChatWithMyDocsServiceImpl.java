@@ -3,6 +3,7 @@ package dev.stiebo.openaiutils.service.impl;
 import dev.stiebo.openaiutils.dto.DocsOutDto;
 import dev.stiebo.openaiutils.exception.FileErrorException;
 import dev.stiebo.openaiutils.service.ChatWithMyDocsService;
+import dev.stiebo.openaiutils.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
@@ -26,12 +27,14 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     private final VectorStore vectorStore;
     private final JdbcClient jdbcClient;
     private final ChatClient chatClient;
+    private final UtilityService utilityService;
 
     @Autowired
     public ChatWithMyDocsServiceImpl(VectorStore vectorStore,
-                                     JdbcClient jdbcClient, ChatClient.Builder builder) {
+                                     JdbcClient jdbcClient, ChatClient.Builder builder, UtilityService utilityService) {
         this.vectorStore = vectorStore;
         this.jdbcClient = jdbcClient;
+        this.utilityService = utilityService;
         this.chatClient = builder
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore))
                 .build();
@@ -47,6 +50,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
 
     @Override
     public void addDocument(MultipartFile file) throws FileErrorException {
+        utilityService.confirmPdfDocumentTypeOrThrow(file);
         if (existsByDocumentName(file.getOriginalFilename())) {
             throw new FileErrorException("Document with that name already exists in database");
         }
@@ -91,4 +95,5 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
                 .stream()
                 .content();
     }
+
 }

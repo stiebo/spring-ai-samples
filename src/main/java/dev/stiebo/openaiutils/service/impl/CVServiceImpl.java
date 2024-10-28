@@ -1,7 +1,6 @@
 package dev.stiebo.openaiutils.service.impl;
 
 import dev.stiebo.openaiutils.dto.CVDataOutDto;
-import dev.stiebo.openaiutils.exception.FileErrorException;
 import dev.stiebo.openaiutils.service.CVService;
 import dev.stiebo.openaiutils.service.ChatClientService;
 import dev.stiebo.openaiutils.service.UtilityService;
@@ -32,9 +31,7 @@ public class CVServiceImpl implements CVService {
 
     @Override
     public CVDataOutDto getCVData(MultipartFile file) {
-        if (!Objects.equals(file.getContentType(), "application/pdf")) {
-            throw new FileErrorException("Invalid File type, only pdf accepted here.");
-        }
+        utilityService.confirmPdfDocumentTypeOrThrow(file);
         String document = utilityService.convertPdfToText(file);
         return chatClientService.getResponse(CVDataOutDto.class, cvPromptTemplate, document);
 

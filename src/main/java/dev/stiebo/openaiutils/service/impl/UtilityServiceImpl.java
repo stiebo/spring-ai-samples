@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 public class UtilityServiceImpl implements UtilityService {
@@ -35,6 +36,15 @@ public class UtilityServiceImpl implements UtilityService {
             };
         } catch (IOException e) {
             throw new RuntimeException("Error processing image file");
+        }
+    }
+
+    @Override
+    public void confirmPdfDocumentTypeOrThrow(MultipartFile file) throws FileErrorException {
+        if (!Objects.equals(file.getContentType(), "application/pdf") &&
+                // Fallback: determine the content type based on file extension
+                !file.getOriginalFilename().endsWith(".pdf")) {
+            throw new FileErrorException("Invalid File type, only pdf accepted here.");
         }
     }
 }
