@@ -25,7 +25,7 @@ public class FlashcardServiceImpl implements FlashcardService {
     private final UtilityService utilityService;
 
     @Value("classpath:/prompts/flashcardscsvprompt.st")
-    Resource flashcardsCsvPrompt;
+    private Resource flashcardsCsvPrompt;
 
     @Autowired
     public FlashcardServiceImpl(ChatClientService chatClientService, UtilityService utilityService) {
