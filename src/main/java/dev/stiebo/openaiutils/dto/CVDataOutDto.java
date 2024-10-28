@@ -10,6 +10,7 @@ public record CVDataOutDto(
         String[] education,
         String[] courses,
         String competencies,
+        String[] languages,
         String hobbies,
         String miscellaneous
 ) {
