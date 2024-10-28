@@ -1,6 +1,7 @@
 package dev.stiebo.openaiutils.controller;
 
 import dev.stiebo.openaiutils.dto.CVDataOutDto;
+import dev.stiebo.openaiutils.dto.Flashcard;
 import dev.stiebo.openaiutils.exception.FileErrorException;
 import dev.stiebo.openaiutils.service.CVService;
 import dev.stiebo.openaiutils.service.FlashcardService;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/openaiutils")
@@ -34,13 +37,19 @@ public class OpenAiUtilsController {
         return cvService.getCVData(file);
     }
 
+    @PostMapping("/createCsvFlashcards")
+    public byte[] createCSvFlashcards (@RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new FileErrorException("Uploaded file is empty. Please upload a valid file.");
+        }
+        return flashcardService.createCsvFlashcardsFromFile(file);
+    }
+
     @PostMapping("/createFlashcards")
-    public byte[] createFlashcards (@RequestParam("file") MultipartFile file) {
+    public List<Flashcard> createFlashcards (@RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new FileErrorException("Uploaded file is empty. Please upload a valid file.");
         }
         return flashcardService.createFlashcardsFromFile(file);
     }
-
-
 }

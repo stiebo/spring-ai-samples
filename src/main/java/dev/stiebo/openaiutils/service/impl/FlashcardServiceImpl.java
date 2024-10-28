@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 @Service
 public class FlashcardServiceImpl implements FlashcardService {
@@ -33,8 +34,12 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     @Override
-    public byte[] createFlashcardsFromFile(MultipartFile file) {
+    public byte[] createCsvFlashcardsFromFile(MultipartFile file) {
+        return convertToCsv(createFlashcardsFromFile(file));
+    }
 
+    @Override
+    public List<Flashcard> createFlashcardsFromFile(MultipartFile file) {
         Flashcards flashcards = switch (file.getContentType()) {
             // call chatClient with (Image-)Resource
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
@@ -44,17 +49,17 @@ public class FlashcardServiceImpl implements FlashcardService {
                     Flashcards.class, flashcardsCsvPrompt, utilityService.convertPdfToText(file));
             case null, default -> throw new FileErrorException("Invalid File Type");
         };
-        return convertToCsv(flashcards);
+        return flashcards.flashcards();
     }
 
-    private byte[] convertToCsv(Flashcards flashcards) {
+    private byte[] convertToCsv(List<Flashcard> flashcards) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              OutputStreamWriter osw = new OutputStreamWriter(baos);
              CSVPrinter csvPrinter = new CSVPrinter(osw,
                      CSVFormat.Builder.create()
                              .setDelimiter('\t')
                              .build())) {
-            for (Flashcard flashcard : flashcards.flashcards()) {
+            for (Flashcard flashcard : flashcards) {
                 csvPrinter.printRecord(flashcard.question(), flashcard.answer());
             }
             csvPrinter.flush();
