@@ -20,8 +20,9 @@ import java.util.Map;
 @RequestMapping("/api/openaiutils")
 @Validated
 public class OpenAiUtilsController {
-    CVService cvService;
-    FlashcardService flashcardService;
+    private final CVService cvService;
+    private final FlashcardService flashcardService;
+    private final ChatWithMyDocsService chatWithMyDocsService;
 
     @Autowired
     public OpenAiUtilsController(CVService cvService, FlashcardService flashcardService) {

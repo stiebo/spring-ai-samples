@@ -18,11 +18,11 @@ import java.util.Objects;
 @Service
 public class CVServiceImpl implements CVService {
 
-    ChatClientService chatClientService;
-    UtilityService utilityService;
+    private final ChatClientService chatClientService;
+    private final UtilityService utilityService;
 
     @Value("classpath:/prompts/cvprompttemplate.st")
-    Resource cvPromptTemplate;
+    private Resource cvPromptTemplate;
 
     @Autowired
     public CVServiceImpl(ChatClientService chatClientService, UtilityService utilityService) {

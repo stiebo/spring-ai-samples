@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Service
 public class ChatClientServiceImpl implements ChatClientService {
-    ChatClient chatClient;
+    private final ChatClient chatClient;
 
     public ChatClientServiceImpl(ChatClient.Builder builder) {
         this.chatClient = builder.build();

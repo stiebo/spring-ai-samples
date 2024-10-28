@@ -21,8 +21,8 @@ import java.util.List;
 
 @Service
 public class FlashcardServiceImpl implements FlashcardService {
-    ChatClientService chatClientService;
-    UtilityService utilityService;
+    private final ChatClientService chatClientService;
+    private final UtilityService utilityService;
 
     @Value("classpath:/prompts/flashcardscsvprompt.st")
     Resource flashcardsCsvPrompt;
