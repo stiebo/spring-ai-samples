@@ -8,9 +8,11 @@ import dev.stiebo.openaiutils.service.CVService;
 import dev.stiebo.openaiutils.service.ChatWithMyDocsService;
 import dev.stiebo.openaiutils.service.FlashcardService;
 import dev.stiebo.openaiutils.validation.NotEmptyFile;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,47 +37,44 @@ public class OpenAiUtilsController {
         this.chatWithMyDocsService = chatWithMyDocsService;
     }
 
-    private void confirmFileExistsOrThrowException (MultipartFile file) {
-
-    }
-
-    @PostMapping("/analyzeCV")
+    @PostMapping(value = "/analyzeCV", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CVDataOutDto analyzeCv(@RequestParam(value = "file", required = false)
-                                      @NotEmptyFile MultipartFile file) {
+                                  @NotEmptyFile MultipartFile file) {
         return cvService.getCVData(file);
     }
 
-    @PostMapping("/createCsvFlashcards")
-    public byte[] createCSvFlashcards (@RequestParam("file") @NotEmptyFile MultipartFile file) {
+    @PostMapping(value = "/createCsvFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public byte[] createCSvFlashcards(@RequestParam("file") @NotEmptyFile MultipartFile file) {
         return flashcardService.createCsvFlashcardsFromFile(file);
     }
 
-    @PostMapping("/createFlashcards")
-    public List<Flashcard> createFlashcards (@RequestParam(value = "file", required = false)
-                                                 @NotEmptyFile MultipartFile file) {
+    @PostMapping(value = "/createFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public List<Flashcard> createFlashcards(@RequestParam(value = "file", required = false)
+                                            @NotEmptyFile MultipartFile file,
+                                            HttpServletRequest request) {
         return flashcardService.createFlashcardsFromFile(file);
     }
 
-    @PostMapping("/chatwithmydocs/documents")
-    public Map<String,String> addDocToRepository (@RequestParam(value = "file", required = false)
-                                                      @NotEmptyFile MultipartFile file) {
+    @PostMapping(value = "/chatwithmydocs/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, String> addDocToRepository(@RequestParam(value = "file", required = false)
+                                                  @NotEmptyFile MultipartFile file) {
         chatWithMyDocsService.addDocument(file);
         return Map.of("response", "Document has been added");
     }
 
     @GetMapping("/chatwithmydocs/documents")
-    public List<DocsOutDto> listDocuments () {
+    public List<DocsOutDto> listDocuments() {
         return chatWithMyDocsService.listDocuments();
     }
 
     @DeleteMapping("/chatwithmydocs/documents/{document_name}")
-    public Map<String,String> deleteDocument (@PathVariable("document_name") @NotBlank String documentName) {
+    public Map<String, String> deleteDocument(@PathVariable("document_name") @NotBlank String documentName) {
         chatWithMyDocsService.deleteDocument(documentName);
         return Map.of("response", "Document has been removed");
     }
 
     @PostMapping("/chatwithmydocs/chat")
-    Flux<String> chat (@Valid @RequestBody ChatInDto chatInDto) {
+    Flux<String> chat(@Valid @RequestBody ChatInDto chatInDto) {
         return chatWithMyDocsService.chat(chatInDto.question());
     }
 }
