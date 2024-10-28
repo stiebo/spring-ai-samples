@@ -47,7 +47,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
 
     @Override
     public void addDocument(MultipartFile file) throws FileErrorException {
-        if (existsByDocumentName(file.getName())) {
+        if (existsByDocumentName(file.getOriginalFilename())) {
             throw new FileErrorException("Document with that name already exists in database");
         }
         log.info("Loading doc into Vectorstore");
