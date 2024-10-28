@@ -2,10 +2,10 @@
 .idea
 build
 gradle
+out
 .gitattributes
 gradlew
 gradlew.bat
 HELP.md
-build.gradle
 settings.gradle
 /src/main/resources/prompts/flashcardscsvprompt.st.bk
