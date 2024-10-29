@@ -6,7 +6,9 @@ import dev.stiebo.openaiutils.service.ChatWithMyDocsService;
 import dev.stiebo.openaiutils.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
@@ -36,6 +38,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
         this.jdbcClient = jdbcClient;
         this.utilityService = utilityService;
         this.chatClient = builder
+                .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore))
                 .build();
     }
