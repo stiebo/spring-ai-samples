@@ -53,7 +53,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         return flashcards.flashcards();
     }
 
-    private byte[] convertToCsv(List<Flashcard> flashcards) {
+    byte[] convertToCsv(List<Flashcard> flashcards) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              OutputStreamWriter osw = new OutputStreamWriter(baos);
              CSVPrinter csvPrinter = new CSVPrinter(osw,
@@ -70,7 +70,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         }
     }
 
-    private String getContentTypeOrThrowException(MultipartFile file) throws FileErrorException {
+    String getContentTypeOrThrowException(MultipartFile file) throws FileErrorException {
         return switch (file.getContentType()) {
             case "image/jpeg", "image/gif", "image/png", "application/pdf" -> file.getContentType();
             case null, default -> {
