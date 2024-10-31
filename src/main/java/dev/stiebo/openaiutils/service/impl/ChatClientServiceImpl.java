@@ -30,7 +30,7 @@ public class ChatClientServiceImpl implements ChatClientService {
         try {
             userPrompt = userPromptResource.getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Error reading flashcardscsvpromt.st");
+            throw new RuntimeException("Error reading userPromptResource");
         }
         // Initialize the BeanOutputConverter with the provided response type
         BeanOutputConverter<T> beanOutputConverter = new BeanOutputConverter<>(responseType);
@@ -52,12 +52,6 @@ public class ChatClientServiceImpl implements ChatClientService {
                 response.getMetadata().getUsage().getGenerationTokens());
         // Convert the response output to the specified type
         return beanOutputConverter.convert(response.getResult().getOutput().getContent());
-    }
-
-    @Override
-    public <T> T getResponse(Class<T> responseType, Resource userPromptResource) {
-        return generateResponse(responseType, userPromptResource, null, null);
-
     }
 
     @Override
