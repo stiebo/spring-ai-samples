@@ -25,7 +25,7 @@ public class FlashcardServiceImpl implements FlashcardService {
     private final UtilityService utilityService;
 
     @Value("classpath:/prompts/flashcardscsvprompt.st")
-    private Resource flashcardsCsvPrompt;
+    private Resource flashcardsPrompt;
 
     @Autowired
     public FlashcardServiceImpl(ChatClientService chatClientService, UtilityService utilityService) {
@@ -44,10 +44,10 @@ public class FlashcardServiceImpl implements FlashcardService {
         Flashcards flashcards = switch (contentType) {
             // call chatClient with (Image-)Resource
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsCsvPrompt, utilityService.convertImageFileToResource(file));
+                    Flashcards.class, flashcardsPrompt, utilityService.convertImageFileToResource(file));
             // call with (String-)document
             case "application/pdf" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsCsvPrompt, utilityService.convertPdfToText(file));
+                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(file));
             default -> throw new IllegalStateException("Unexpected value: " + contentType);
         };
         return flashcards.flashcards();
