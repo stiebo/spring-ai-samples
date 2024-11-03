@@ -41,7 +41,7 @@ class FlashcardServiceImplTest {
         // flashcardsCsvPrompt is injected via @Value, for testing inject the mock resource directly into the
         // private field using ReflectionTestUtils
         mockFlashcardsCsvPrompt = new ByteArrayResource("mockPrompt".getBytes());
-        ReflectionTestUtils.setField(flashcardService, "flashcardsCsvPrompt", mockFlashcardsCsvPrompt);
+        ReflectionTestUtils.setField(flashcardService, "flashcardsPrompt", mockFlashcardsCsvPrompt);
     }
 
     private void testCreateFlashcardsFromFileWithAllowedType(String fileExtension, String contentType) {
