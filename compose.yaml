@@ -10,6 +10,7 @@ services:
       - OPENAI_API_KEY
       - DB_USER
       - DB_PASSWORD
+      - SERVER_SERVLET_CONTEXT_PATH=/aiutilities  # set to nginx path
     ports:
       - "28857:28857"
     depends_on:
