@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/aiutilities")
+@RequestMapping("/api")
 @Validated
 public class AiUtilitiesController {
     private final CVService cvService;
