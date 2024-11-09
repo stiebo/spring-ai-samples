@@ -1,8 +1,24 @@
 services:
+  app:
+    build:
+      context: ./   #builds the docker image from Dockerfile in current directory
+      dockerfile: Dockerfile
+    image: openaiutils:latest
+    environment:
+      OpenAiApiKey: the API Key
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pgvector
+    networks:
+      - app-network
+    restart: always
+
+
   pgvector:
     image: 'pgvector/pgvector:pg16'
     environment:
-      - 'POSTGRES_DB=openaiutils'
+      - 'POSTGRES_DB=aiutilities'
       - 'POSTGRES_PASSWORD=password'
       - 'POSTGRES_USER=admin'
     labels:
