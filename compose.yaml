@@ -17,7 +17,7 @@ services:
       - pgvector
     networks:
       - app-network
-    restart: always
+    #restart: always
 
 
   pgvector:
@@ -36,7 +36,7 @@ services:
       - app-network
     volumes:
       - db_data:/var/lib/postgresql/data
-    restart: always
+    #restart: always
 
 networks:
   app-network:
