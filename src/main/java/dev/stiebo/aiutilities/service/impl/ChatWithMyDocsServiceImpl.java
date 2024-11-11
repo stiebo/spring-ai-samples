@@ -16,6 +16,8 @@ import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,12 +34,15 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     private final UtilityService utilityService;
 
     @Autowired
-    public ChatWithMyDocsServiceImpl(VectorStore vectorStore,
-                                     JdbcClient jdbcClient, ChatClient.Builder builder, UtilityService utilityService) {
+    public ChatWithMyDocsServiceImpl(VectorStore vectorStore, JdbcClient jdbcClient, ChatClient.Builder builder,
+                                     UtilityService utilityService, ResourceLoader resourceLoader) {
         this.vectorStore = vectorStore;
         this.jdbcClient = jdbcClient;
         this.utilityService = utilityService;
+        Resource resourceSystemPrompt =
+                resourceLoader.getResource("classpath:/prompts/chatclientsystemprompt.st");
         this.chatClient = builder
+                .defaultSystem(resourceSystemPrompt)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
                 .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore))
                 .build();
@@ -45,7 +50,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
 
     private boolean existsByDocumentName(String documentName) {
         return jdbcClient.sql(
-                "SELECT EXISTS (SELECT 1 FROM vector_store WHERE metadata->>'file_name' = :file_name)")
+                        "SELECT EXISTS (SELECT 1 FROM vector_store WHERE metadata->>'file_name' = :file_name)")
                 .param("file_name", documentName)
                 .query(Boolean.class)
                 .single();
@@ -75,9 +80,9 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     @Override
     public List<DocsOutDto> listDocuments() {
         return jdbcClient.sql(
-                "SELECT DISTINCT metadata->>'file_name' AS document_name " +
-                        "FROM vector_store " +
-                        "WHERE metadata->>'file_name' IS NOT NULL")
+                        "SELECT DISTINCT metadata->>'file_name' AS document_name " +
+                                "FROM vector_store " +
+                                "WHERE metadata->>'file_name' IS NOT NULL")
                 .query(DocsOutDto.class).list();
     }
 
