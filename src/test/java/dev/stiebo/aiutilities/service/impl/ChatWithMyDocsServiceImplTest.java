@@ -12,6 +12,7 @@ import org.mockito.Spy;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,9 @@ class ChatWithMyDocsServiceImplTest {
     @Spy
     private UtilityService utilityService = new UtilityServiceImpl();
 
+    @Mock
+    private ResourceLoader resourceLoader;
+
     private ChatWithMyDocsServiceImpl chatWithMyDocsService;
 
     @BeforeEach
@@ -51,7 +55,7 @@ class ChatWithMyDocsServiceImplTest {
                 .build()).thenReturn(chatClient);
 
         chatWithMyDocsService = new ChatWithMyDocsServiceImpl(
-                vectorStore, jdbcClient, builder, utilityService);
+                vectorStore, jdbcClient, builder, utilityService, resourceLoader);
     }
 
     private MockMultipartFile getMockMultipartFile() {
