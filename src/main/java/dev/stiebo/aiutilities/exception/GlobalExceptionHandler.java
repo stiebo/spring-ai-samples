@@ -18,15 +18,15 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(FileErrorException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ResponseEntity<ErrorResponse> handleFileErrorException(Exception ex, WebRequest request) {
         return new ResponseEntity<>(new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "File Error",
                 ex.getMessage(),
                 request.getDescription(false)
-        ), HttpStatus.BAD_REQUEST);
+        ), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     // Handle @Valid and @Validated validation failures
