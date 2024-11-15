@@ -9,7 +9,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Objects;
 
 @Service
 public class UtilityServiceImpl implements UtilityService {
@@ -31,7 +30,7 @@ public class UtilityServiceImpl implements UtilityService {
      */
     @Override
     public void confirmPdfDocumentType(FileResource fileResource) throws FileErrorException {
-        if (!Objects.equals(fileResource.contentType(), "application/pdf") &&
+        if (!fileResource.contentType().equals("application/pdf") &&
                 // Fallback: determine the content type based on file extension
                 !fileResource.fileName().endsWith(".pdf")) {
             throw new FileErrorException("Invalid File type, only pdf accepted here.");
