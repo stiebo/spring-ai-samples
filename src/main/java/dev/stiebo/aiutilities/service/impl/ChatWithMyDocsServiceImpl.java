@@ -2,6 +2,7 @@ package dev.stiebo.aiutilities.service.impl;
 
 import dev.stiebo.aiutilities.dto.DocsOutDto;
 import dev.stiebo.aiutilities.exception.FileErrorException;
+import dev.stiebo.aiutilities.model.FileResource;
 import dev.stiebo.aiutilities.service.ChatWithMyDocsService;
 import dev.stiebo.aiutilities.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     /**
      * Constructs an instance of the ChatWithMyDocsServiceImpl class and injects ChatMemory and
      * QuestionAnswerAdvisor into the chatClient. QuestionAnswerAdvisor enables the chatClient to use
-     * a vector store for SimilaritySearch later on during chats using RAG (Retrieval-Augmented Generation).
+     * a vector store to do SimilaritySearch later on using RAG (Retrieval-Augmented Generation).
      * * For further details, please refer to the documentation:
      *      * <a href="https://docs.spring.io/spring-ai/reference/api/chatclient.html">
      *      * https://docs.spring.io/spring-ai/reference/api/chatclient.html</a>
@@ -77,13 +77,13 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
      * <a href="https://docs.spring.io/spring-ai/reference/api/vectordbs.html">
      * https://docs.spring.io/spring-ai/reference/api/vectordbs.html</a>
      *
-     * @param file the PDF file to be added.
+     * @param fileResource the PDF file to be added.
      * @throws FileErrorException if the file is not a PDF or if a document with the same name already exists.
      */
     @Override
-    public void addDocument(MultipartFile file) throws FileErrorException {
-        utilityService.confirmPdfDocumentTypeOrThrow(file);
-        if (existsByDocumentName(file.getOriginalFilename())) {
+    public void addDocument(FileResource fileResource) throws FileErrorException {
+        utilityService.confirmPdfDocumentType(fileResource);
+        if (existsByDocumentName(fileResource.fileName())) {
             throw new FileErrorException("Document with that name already exists in database");
         }
         log.info("Loading doc into Vectorstore");
@@ -94,7 +94,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
                 .withPagesPerDocument(1)
                 .build();
 
-        PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(file.getResource(), config);
+        PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(fileResource.resource(), config);
         TokenTextSplitter tokenTextSplitter = new TokenTextSplitter();
         List<Document> docs = tokenTextSplitter.apply(pagePdfDocumentReader.get());
         vectorStore.accept(docs);

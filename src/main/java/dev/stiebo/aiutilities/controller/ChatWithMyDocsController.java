@@ -4,6 +4,7 @@ import dev.stiebo.aiutilities.dto.ChatInDto;
 import dev.stiebo.aiutilities.dto.DocsOutDto;
 import dev.stiebo.aiutilities.exception.ErrorResponse;
 import dev.stiebo.aiutilities.exception.ValidationErrorResponse;
+import dev.stiebo.aiutilities.model.Mapper;
 import dev.stiebo.aiutilities.service.ChatWithMyDocsService;
 import dev.stiebo.aiutilities.validation.NotEmptyFile;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,10 +31,12 @@ import java.util.Map;
 @Validated
 public class ChatWithMyDocsController {
     private final ChatWithMyDocsService chatWithMyDocsService;
+    private final Mapper mapper;
 
     @Autowired
-    public ChatWithMyDocsController(ChatWithMyDocsService chatWithMyDocsService) {
+    public ChatWithMyDocsController(ChatWithMyDocsService chatWithMyDocsService, Mapper mapper) {
         this.chatWithMyDocsService = chatWithMyDocsService;
+        this.mapper = mapper;
     }
 
     @Operation(summary = "Add Document to Repository",
@@ -55,7 +59,7 @@ public class ChatWithMyDocsController {
     @PostMapping(value = "/chatwithmydocs/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, String> addDocToRepository(@RequestParam(value = "file", required = false)
                                                   @NotEmptyFile MultipartFile file) {
-        chatWithMyDocsService.addDocument(file);
+        chatWithMyDocsService.addDocument(mapper.multipartFileToFileResource(file));
         return Map.of("status", "Document has been added");
     }
 

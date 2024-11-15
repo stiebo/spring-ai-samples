@@ -1,6 +1,7 @@
 package dev.stiebo.aiutilities.service.impl;
 
 import dev.stiebo.aiutilities.dto.CVDataOutDto;
+import dev.stiebo.aiutilities.model.FileResource;
 import dev.stiebo.aiutilities.service.CVService;
 import dev.stiebo.aiutilities.service.ChatClientService;
 import dev.stiebo.aiutilities.service.UtilityService;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -28,10 +28,9 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
-    public CVDataOutDto getCVData(MultipartFile file) {
-        utilityService.confirmPdfDocumentTypeOrThrow(file);
-        String document = utilityService.convertPdfToText(file);
+    public CVDataOutDto getCVData(FileResource fileResource) {
+        utilityService.confirmPdfDocumentType(fileResource);
+        String document = utilityService.convertPdfToText(fileResource);
         return chatClientService.getResponse(CVDataOutDto.class, cvPromptTemplate, document);
-
     }
 }
