@@ -33,6 +33,20 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     private final ChatClient chatClient;
     private final UtilityService utilityService;
 
+    /**
+     * Constructs an instance of the ChatWithMyDocsServiceImpl class and injects ChatMemory and
+     * QuestionAnswerAdvisor into the chatClient. QuestionAnswerAdvisor enables the chatClient to use
+     * a vector store for SimilaritySearch later on during chats using RAG (Retrieval-Augmented Generation).
+     * * For further details, please refer to the documentation:
+     *      * <a href="https://docs.spring.io/spring-ai/reference/api/chatclient.html">
+     *      * https://docs.spring.io/spring-ai/reference/api/chatclient.html</a>
+     *
+     * @param vectorStore      the vector store used for managing vectors
+     * @param jdbcClient       the JDBC client for database operations
+     * @param builder          the ChatClient.Builder for constructing the chat client
+     * @param utilityService   the utility service for miscellaneous supportive operations
+     * @param resourceLoader   the resource loader for accessing system resources
+     */
     @Autowired
     public ChatWithMyDocsServiceImpl(VectorStore vectorStore, JdbcClient jdbcClient, ChatClient.Builder builder,
                                      UtilityService utilityService, ResourceLoader resourceLoader) {
@@ -56,6 +70,16 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
                 .single();
     }
 
+    /**
+     * Adds a PDF document to the system, validates its type, and checks for duplicate names.
+     * The document is subsequently split into multiple parts and added to a Vectorstore.
+     * For further details, please refer to the documentation:
+     * <a href="https://docs.spring.io/spring-ai/reference/api/vectordbs.html">
+     * https://docs.spring.io/spring-ai/reference/api/vectordbs.html</a>
+     *
+     * @param file the PDF file to be added.
+     * @throws FileErrorException if the file is not a PDF or if a document with the same name already exists.
+     */
     @Override
     public void addDocument(MultipartFile file) throws FileErrorException {
         utilityService.confirmPdfDocumentTypeOrThrow(file);
