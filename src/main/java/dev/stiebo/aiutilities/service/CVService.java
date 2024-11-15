@@ -1,8 +1,8 @@
 package dev.stiebo.aiutilities.service;
 
 import dev.stiebo.aiutilities.dto.CVDataOutDto;
-import org.springframework.web.multipart.MultipartFile;
+import dev.stiebo.aiutilities.model.FileResource;
 
 public interface CVService {
-    CVDataOutDto getCVData (MultipartFile file);
+    CVDataOutDto getCVData (FileResource fileResource);
 }

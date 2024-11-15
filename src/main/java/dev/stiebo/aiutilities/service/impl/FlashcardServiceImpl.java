@@ -3,6 +3,7 @@ package dev.stiebo.aiutilities.service.impl;
 import dev.stiebo.aiutilities.dto.Flashcard;
 import dev.stiebo.aiutilities.dto.Flashcards;
 import dev.stiebo.aiutilities.exception.FileErrorException;
+import dev.stiebo.aiutilities.model.FileResource;
 import dev.stiebo.aiutilities.service.ChatClientService;
 import dev.stiebo.aiutilities.service.FlashcardService;
 import dev.stiebo.aiutilities.service.UtilityService;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,20 +34,20 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     @Override
-    public byte[] createCsvFlashcardsFromFile(MultipartFile file) {
-        return convertToCsv(createFlashcardsFromFile(file));
+    public byte[] createCsvFlashcardsFromFile(FileResource fileResource) {
+        return convertToCsv(createFlashcardsFromFile(fileResource));
     }
 
     @Override
-    public List<Flashcard> createFlashcardsFromFile(MultipartFile file) {
-        String contentType = getContentTypeOrThrowException(file);
+    public List<Flashcard> createFlashcardsFromFile(FileResource fileResource) {
+        String contentType = getContentType(fileResource);
         Flashcards flashcards = switch (contentType) {
             // call chatClient with (Image-)Resource
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsPrompt, utilityService.convertImageFileToResource(file));
+                    Flashcards.class, flashcardsPrompt, fileResource.resource());
             // call with (String-)document
             case "application/pdf" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(file));
+                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(fileResource));
             default -> throw new IllegalStateException("Unexpected value: " + contentType);
         };
         return flashcards.flashcards();
@@ -66,28 +66,26 @@ public class FlashcardServiceImpl implements FlashcardService {
             csvPrinter.flush();
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Error converting to csv");
+            throw new FileErrorException("Error converting to csv");
         }
     }
 
-    String getContentTypeOrThrowException(MultipartFile file) throws FileErrorException {
-        return switch (file.getContentType()) {
-            case "image/jpeg", "image/gif", "image/png", "application/pdf" -> file.getContentType();
-            case null, default -> {
+    String getContentType(FileResource fileResource) {
+        return switch (fileResource.contentType()) {
+            case "image/jpeg", "image/gif", "image/png", "application/pdf" -> fileResource.contentType();
+            default -> {
                 // Fallback: determine the content type based on file extension
-                String fileName = file.getOriginalFilename();
-                if (fileName != null) {
-                    if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-                        yield "image/jpeg";
-                    } else if (fileName.endsWith(".gif")) {
-                        yield "image/gif";
-                    } else if (fileName.endsWith(".png")) {
-                        yield "image/png";
-                    } else if (fileName.endsWith(".pdf")) {
-                        yield "application/pdf";
-                    }
+                String fileName = fileResource.fileName();
+                if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+                    yield "image/jpeg";
+                } else if (fileName.endsWith(".gif")) {
+                    yield "image/gif";
+                } else if (fileName.endsWith(".png")) {
+                    yield "image/png";
+                } else if (fileName.endsWith(".pdf")) {
+                    yield "application/pdf";
                 }
-                throw new FileErrorException("Invalid File Type: " + file.getContentType());
+                throw new FileErrorException("Invalid File Type: " + fileResource.contentType());
             }
         };
     }

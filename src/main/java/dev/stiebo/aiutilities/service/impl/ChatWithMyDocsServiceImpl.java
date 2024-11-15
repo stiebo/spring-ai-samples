@@ -2,6 +2,7 @@ package dev.stiebo.aiutilities.service.impl;
 
 import dev.stiebo.aiutilities.dto.DocsOutDto;
 import dev.stiebo.aiutilities.exception.FileErrorException;
+import dev.stiebo.aiutilities.model.FileResource;
 import dev.stiebo.aiutilities.service.ChatWithMyDocsService;
 import dev.stiebo.aiutilities.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -33,6 +33,20 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
     private final ChatClient chatClient;
     private final UtilityService utilityService;
 
+    /**
+     * Constructs an instance of the ChatWithMyDocsServiceImpl class and injects ChatMemory and
+     * QuestionAnswerAdvisor into the chatClient. QuestionAnswerAdvisor enables the chatClient to use
+     * a vector store to do SimilaritySearch later on using RAG (Retrieval-Augmented Generation).
+     * * For further details, please refer to the documentation:
+     *      * <a href="https://docs.spring.io/spring-ai/reference/api/chatclient.html">
+     *      * https://docs.spring.io/spring-ai/reference/api/chatclient.html</a>
+     *
+     * @param vectorStore      the vector store used for managing vectors
+     * @param jdbcClient       the JDBC client for database operations
+     * @param builder          the ChatClient.Builder for constructing the chat client
+     * @param utilityService   the utility service for miscellaneous supportive operations
+     * @param resourceLoader   the resource loader for accessing system resources
+     */
     @Autowired
     public ChatWithMyDocsServiceImpl(VectorStore vectorStore, JdbcClient jdbcClient, ChatClient.Builder builder,
                                      UtilityService utilityService, ResourceLoader resourceLoader) {
@@ -56,10 +70,20 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
                 .single();
     }
 
+    /**
+     * Adds a PDF document to the system, validates its type, and checks for duplicate names.
+     * The document is subsequently split into multiple parts and added to a Vectorstore.
+     * For further details, please refer to the documentation:
+     * <a href="https://docs.spring.io/spring-ai/reference/api/vectordbs.html">
+     * https://docs.spring.io/spring-ai/reference/api/vectordbs.html</a>
+     *
+     * @param fileResource the PDF file to be added.
+     * @throws FileErrorException if the file is not a PDF or if a document with the same name already exists.
+     */
     @Override
-    public void addDocument(MultipartFile file) throws FileErrorException {
-        utilityService.confirmPdfDocumentTypeOrThrow(file);
-        if (existsByDocumentName(file.getOriginalFilename())) {
+    public void addDocument(FileResource fileResource) throws FileErrorException {
+        utilityService.confirmPdfDocumentType(fileResource);
+        if (existsByDocumentName(fileResource.fileName())) {
             throw new FileErrorException("Document with that name already exists in database");
         }
         log.info("Loading doc into Vectorstore");
@@ -70,7 +94,7 @@ public class ChatWithMyDocsServiceImpl implements ChatWithMyDocsService {
                 .withPagesPerDocument(1)
                 .build();
 
-        PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(file.getResource(), config);
+        PagePdfDocumentReader pagePdfDocumentReader = new PagePdfDocumentReader(fileResource.resource(), config);
         TokenTextSplitter tokenTextSplitter = new TokenTextSplitter();
         List<Document> docs = tokenTextSplitter.apply(pagePdfDocumentReader.get());
         vectorStore.accept(docs);

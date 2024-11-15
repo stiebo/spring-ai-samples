@@ -3,6 +3,7 @@ package dev.stiebo.aiutilities.controller;
 import dev.stiebo.aiutilities.dto.CVDataOutDto;
 import dev.stiebo.aiutilities.exception.ErrorResponse;
 import dev.stiebo.aiutilities.exception.ValidationErrorResponse;
+import dev.stiebo.aiutilities.model.Mapper;
 import dev.stiebo.aiutilities.service.CVService;
 import dev.stiebo.aiutilities.validation.NotEmptyFile;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,10 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class AnalyzeCvController {
 
     private final CVService cvService;
+    private final Mapper mapper;
 
     @Autowired
-    public AnalyzeCvController(CVService cvService) {
+    public AnalyzeCvController(CVService cvService, Mapper mapper) {
         this.cvService = cvService;
+        this.mapper = mapper;
     }
 
     @Operation(summary = "Analyze CV",
@@ -51,7 +54,7 @@ public class AnalyzeCvController {
     @PostMapping(value = "/analyzeCV", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CVDataOutDto analyzeCv(@RequestParam(value = "file", required = false)
                                   @NotEmptyFile MultipartFile file) {
-        return cvService.getCVData(file);
+        return cvService.getCVData(mapper.multipartFileToFileResource(file));
     }
 
 }

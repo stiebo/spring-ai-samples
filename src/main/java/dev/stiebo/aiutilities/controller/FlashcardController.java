@@ -3,6 +3,7 @@ package dev.stiebo.aiutilities.controller;
 import dev.stiebo.aiutilities.dto.Flashcard;
 import dev.stiebo.aiutilities.exception.ErrorResponse;
 import dev.stiebo.aiutilities.exception.ValidationErrorResponse;
+import dev.stiebo.aiutilities.model.Mapper;
 import dev.stiebo.aiutilities.service.FlashcardService;
 import dev.stiebo.aiutilities.validation.NotEmptyFile;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -29,16 +30,18 @@ import java.util.List;
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
+    private final Mapper mapper;
 
     @Autowired
-    public FlashcardController(FlashcardService flashcardService) {
+    public FlashcardController(FlashcardService flashcardService, Mapper mapper) {
         this.flashcardService = flashcardService;
+        this.mapper = mapper;
     }
 
     @Hidden
     @PostMapping(value = "/createCsvFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public byte[] createCSvFlashcards(@RequestParam("file") @NotEmptyFile MultipartFile file) {
-        return flashcardService.createCsvFlashcardsFromFile(file);
+        return flashcardService.createCsvFlashcardsFromFile(mapper.multipartFileToFileResource(file));
     }
 
     @Operation(summary = "Create Flashcards",
@@ -61,7 +64,7 @@ public class FlashcardController {
     @PostMapping(value = "/createFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public List<Flashcard> createFlashcards(@RequestParam(value = "file", required = false)
                                             @NotEmptyFile MultipartFile file) {
-        return flashcardService.createFlashcardsFromFile(file);
+        return flashcardService.createFlashcardsFromFile(mapper.multipartFileToFileResource(file));
     }
 
 }
