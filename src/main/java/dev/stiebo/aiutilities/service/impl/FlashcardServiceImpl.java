@@ -66,26 +66,24 @@ public class FlashcardServiceImpl implements FlashcardService {
             csvPrinter.flush();
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Error converting to csv");
+            throw new FileErrorException("Error converting to csv");
         }
     }
 
     String getContentType(FileResource fileResource) {
         return switch (fileResource.contentType()) {
             case "image/jpeg", "image/gif", "image/png", "application/pdf" -> fileResource.contentType();
-            case null, default -> {
+            default -> {
                 // Fallback: determine the content type based on file extension
                 String fileName = fileResource.fileName();
-                if (fileName != null) {
-                    if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
-                        yield "image/jpeg";
-                    } else if (fileName.endsWith(".gif")) {
-                        yield "image/gif";
-                    } else if (fileName.endsWith(".png")) {
-                        yield "image/png";
-                    } else if (fileName.endsWith(".pdf")) {
-                        yield "application/pdf";
-                    }
+                if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+                    yield "image/jpeg";
+                } else if (fileName.endsWith(".gif")) {
+                    yield "image/gif";
+                } else if (fileName.endsWith(".png")) {
+                    yield "image/png";
+                } else if (fileName.endsWith(".pdf")) {
+                    yield "application/pdf";
                 }
                 throw new FileErrorException("Invalid File Type: " + fileResource.contentType());
             }
