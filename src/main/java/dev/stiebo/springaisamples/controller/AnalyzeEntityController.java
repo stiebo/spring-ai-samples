@@ -52,8 +52,8 @@ public class AnalyzeEntityController {
                     """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Spreadsheet created and filled with information",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = EntityDetails.class)))),
+                    content = @Content(mediaType = "text/csv",
+                            array = @ArraySchema(schema = @Schema(type = "string", format = "binary")))),
             @ApiResponse(responseCode = "422", description = "File Error",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
