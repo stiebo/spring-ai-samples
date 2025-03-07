@@ -44,6 +44,7 @@ public class FlashcardController {
             description = """
                     Generates study flashcards from text (pdf) or image files with AI and returns them as a CSV file.
                     For PDF files, an option parameter (1, 2, or 3) can be provided to specify the processing method.
+                    (default: 3)
                     
                     Option 1: convert pdf to list of images and call AI once for entire pdf using multimodal
                     -> creates much shorter Q&A but is faster
@@ -71,7 +72,8 @@ public class FlashcardController {
     })
     @PostMapping(value = "/createCsvFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> createCSvFlashcards(@RequestParam("file") @NotEmptyFile MultipartFile file,
-                                                      @RequestParam(value = "option", required = false, defaultValue = "1") int option) {
+                                                      @RequestParam(value = "option", required = false,
+                                                              defaultValue = "3") int option) {
         byte[] csvData = flashcardService.createCsvFlashcardsFromFile(mapper.multipartFileToFileResource(file), option);
 
         return ResponseEntity.ok()
@@ -85,6 +87,7 @@ public class FlashcardController {
                     Generates study flashcards from text (pdf) or image files with AI.
                     Image files will be analyzed using multimodal GPT.
                     For PDF files, an option parameter (1, 2, or 3) can be provided to specify the processing method.
+                    (default: 3)
                     
                     Option 1: convert pdf to list of images and call AI once for entire pdf using multimodal.
                     -> creates much shorter Q&A but is faster
@@ -113,7 +116,7 @@ public class FlashcardController {
     @PostMapping(value = "/createFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public List<Flashcard> createFlashcards(@RequestParam(value = "file", required = false)
                                             @NotEmptyFile MultipartFile file,
-                                            @RequestParam(value = "option", required = false, defaultValue = "1")
+                                            @RequestParam(value = "option", required = false, defaultValue = "3")
                                             int option) {
         return flashcardService.createFlashcardsFromFile(mapper.multipartFileToFileResource(file), option);
     }
