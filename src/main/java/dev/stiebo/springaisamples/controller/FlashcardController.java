@@ -6,7 +6,6 @@ import dev.stiebo.springaisamples.exception.ValidationErrorResponse;
 import dev.stiebo.springaisamples.model.Mapper;
 import dev.stiebo.springaisamples.service.FlashcardService;
 import dev.stiebo.springaisamples.validation.NotEmptyFile;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
