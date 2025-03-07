@@ -10,10 +10,10 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.model.Media;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -24,7 +24,8 @@ public class ChatClientServiceImpl implements ChatClientService {
         this.chatClient = builder.build();
     }
 
-    private <T> T generateResponse(Class<T> responseType, Resource userPromptResource, Media media, String document) {
+    private <T> T generateResponse(Class<T> responseType, Resource userPromptResource,
+                                   List<Media> mediaList, String document) {
         String userPrompt;
         try {
             userPrompt = userPromptResource.getContentAsString(StandardCharsets.UTF_8);
@@ -35,9 +36,9 @@ public class ChatClientServiceImpl implements ChatClientService {
         String format = beanOutputConverter.getFormat();
         String promptString = "%s\n%s\n%s".formatted(userPrompt, format,
                 document != null ? "CONTENT\n%s".formatted(document) : "");
-        UserMessage userMessage = (media == null)
+        UserMessage userMessage = (mediaList == null)
                 ? new UserMessage(promptString)
-                : new UserMessage(promptString, media);
+                : new UserMessage(promptString, mediaList);
         Prompt prompt = new Prompt(userMessage);
         ChatResponse response = chatClient.prompt(prompt).call().chatResponse();
         log.info("Chat client consumed {} tokens, including {} input and {} output tokens.",
@@ -48,9 +49,8 @@ public class ChatClientServiceImpl implements ChatClientService {
     }
 
     @Override
-    public <T> T getResponse(Class<T> responseType, Resource userPromptResource, Resource imageResource) {
-        return generateResponse(responseType, userPromptResource,
-                new Media(MimeTypeUtils.IMAGE_JPEG, imageResource), null);
+    public <T> T getResponse(Class<T> responseType, Resource userPromptResource, List<Media> mediaList) {
+        return generateResponse(responseType, userPromptResource, mediaList, null);
     }
 
     @Override

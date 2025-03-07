@@ -9,14 +9,17 @@ import dev.stiebo.springaisamples.service.FlashcardService;
 import dev.stiebo.springaisamples.service.UtilityService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.springframework.ai.model.Media;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,23 +37,48 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     @Override
-    public byte[] createCsvFlashcardsFromFile(FileResource fileResource) {
-        return convertToCsv(createFlashcardsFromFile(fileResource));
+    public byte[] createCsvFlashcardsFromFile(FileResource fileResource, int option) {
+        return convertToCsv(createFlashcardsFromFile(fileResource, option));
     }
 
     @Override
-    public List<Flashcard> createFlashcardsFromFile(FileResource fileResource) {
+    public List<Flashcard> createFlashcardsFromFile(FileResource fileResource, int option) {
         String contentType = getContentType(fileResource);
-        Flashcards flashcards = switch (contentType) {
+        return switch (contentType) {
             // call chatClient with (Image-)Resource
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsPrompt, fileResource.resource());
+                    Flashcards.class, flashcardsPrompt,
+                    List.of(new Media(MimeTypeUtils.parseMimeType(contentType), fileResource.resource()))).flashcards();
             // call with (String-)document
-            case "application/pdf" -> chatClientService.getResponse(
-                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(fileResource));
+            case "application/pdf" -> {
+                yield switch (option) {
+                    // Option 1: call chatClient with List<Media> in one go
+                    // -> creates much shorter Q&A but is faster
+                    case 1 -> chatClientService
+                            .getResponse(
+                                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToImages(fileResource))
+                            .flashcards();
+                    // Option 2: call chatClient separately with 1 image per 1 page
+                    // -> creates longer Q&A but is way slower
+                    case 2 -> {
+                        List<Media> mediaList = utilityService.convertPdfToImages(fileResource);
+                        List<Flashcard> flashcardsList = new ArrayList<>();
+                        for (Media imageMedia : mediaList) {
+                            flashcardsList.addAll(chatClientService.getResponse(
+                                    Flashcards.class, flashcardsPrompt, List.of(imageMedia)).flashcards());
+                        }
+                        yield flashcardsList;
+                    }
+                    // Option 3: call chatClient with (String-)document, creates longer Q&A but only works if pdf
+                    // is text-based
+                    case 3 -> chatClientService.getResponse(
+                                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(fileResource))
+                            .flashcards();
+                    default -> throw new IllegalStateException("Unexpected option value: " + option);
+                };
+            }
             default -> throw new IllegalStateException("Unexpected value: " + contentType);
         };
-        return flashcards.flashcards();
     }
 
     byte[] convertToCsv(List<Flashcard> flashcards) {

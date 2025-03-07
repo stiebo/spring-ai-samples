@@ -11,8 +11,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.Media;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -62,12 +64,13 @@ class ChatClientServiceImplTest {
 
         Resource mockUserPromptResource = new ByteArrayResource("userprompt".getBytes());
         Resource mockImageResource = new ByteArrayResource(new byte[]{20, 21, 22});
+        List<Media> mockMedia = List.of(new Media(MimeTypeUtils.parseMimeType("image/jpeg"), mockImageResource));
 
         ObjectMapper objectMapper = new ObjectMapper();
         when(mockChatResponse.getResult().getOutput().getContent())
                 .thenReturn(objectMapper.writeValueAsString(mockFlashcards));
 
-        Flashcards result = chatClientService.getResponse(Flashcards.class, mockUserPromptResource, mockImageResource);
+        Flashcards result = chatClientService.getResponse(Flashcards.class, mockUserPromptResource, mockMedia);
 
         assertEquals(mockFlashcards, result);
         ArgumentCaptor<Prompt> promptArgumentCaptor = ArgumentCaptor.forClass(Prompt.class);
