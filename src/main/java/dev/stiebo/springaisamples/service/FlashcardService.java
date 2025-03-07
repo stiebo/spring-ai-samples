@@ -6,6 +6,6 @@ import dev.stiebo.springaisamples.model.FileResource;
 import java.util.List;
 
 public interface FlashcardService {
-    byte[] createCsvFlashcardsFromFile(FileResource fileResource);
-    List<Flashcard> createFlashcardsFromFile(FileResource fileResource);
+    byte[] createCsvFlashcardsFromFile(FileResource fileResource, int option);
+    List<Flashcard> createFlashcardsFromFile(FileResource fileResource, int option);
 }
