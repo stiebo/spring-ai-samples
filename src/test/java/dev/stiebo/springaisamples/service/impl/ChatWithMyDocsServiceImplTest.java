@@ -2,6 +2,8 @@ package dev.stiebo.springaisamples.service.impl;
 
 import dev.stiebo.springaisamples.dto.DocsOutDto;
 import dev.stiebo.springaisamples.exception.FileErrorException;
+import dev.stiebo.springaisamples.model.FileResource;
+import dev.stiebo.springaisamples.model.Mapper;
 import dev.stiebo.springaisamples.service.UtilityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.mockito.Spy;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.mock.web.MockMultipartFile;
@@ -43,6 +46,9 @@ class ChatWithMyDocsServiceImplTest {
 
     @Mock
     private ResourceLoader resourceLoader;
+
+    @Autowired
+    private Mapper mapper;
 
     private ChatWithMyDocsServiceImpl chatWithMyDocsService;
 
@@ -77,6 +83,7 @@ class ChatWithMyDocsServiceImplTest {
     void testAddDocumentAddsFileIntoVectorStore() {
         // Convert the file to an InputStream
         MockMultipartFile file = getMockMultipartFile();
+        FileResource fileResource = mapper.multipartFileToFileResource(file);
         when(jdbcClient.sql(anyString())
                 .param(anyString(), anyString())
                 .query(Boolean.class)
@@ -84,9 +91,9 @@ class ChatWithMyDocsServiceImplTest {
                 .thenReturn(false);
         doNothing().when(vectorStore).accept(anyList());
 
-        chatWithMyDocsService.addDocument(file);
+        chatWithMyDocsService.addDocument(fileResource);
 
-        verify(utilityService, times(1)).confirmPdfDocumentTypeOrThrow(file);
+        verify(utilityService, times(1)).confirmPdfDocumentType(fileResource);
         verify(vectorStore, times(1)).accept(anyList());
     }
 
@@ -96,7 +103,7 @@ class ChatWithMyDocsServiceImplTest {
                 "text/plain", "test data".getBytes());
 
         assertThrows(FileErrorException.class, () ->
-                chatWithMyDocsService.addDocument(file));
+                chatWithMyDocsService.addDocument(mapper.multipartFileToFileResource(file)));
     }
 
     @Test
@@ -110,7 +117,9 @@ class ChatWithMyDocsServiceImplTest {
                 .single())
                 .thenReturn(true);
 
-        assertThrows(FileErrorException.class, () -> chatWithMyDocsService.addDocument(file));
+        assertThrows(FileErrorException.class, () -> chatWithMyDocsService.addDocument(
+                mapper.multipartFileToFileResource(file)
+        ));
         verify(vectorStore, never()).accept(anyList());
     }
 

@@ -46,7 +46,6 @@ public class FlashcardServiceImpl implements FlashcardService {
         String contentType = getContentType(fileResource);
         return switch (contentType) {
             // call chatClient with (Image-)Resource
-
             case "image/jpeg", "image/gif", "image/png" -> chatClientService.getResponse(
                     Flashcards.class, flashcardsPrompt,
                     List.of(new Media(MimeTypeUtils.parseMimeType(contentType), fileResource.resource()))).flashcards();
@@ -73,7 +72,8 @@ public class FlashcardServiceImpl implements FlashcardService {
                     // Option 3: call chatClient with (String-)document, creates longer Q&A but only works if pdf
                     // is text-based
                     case 3 -> chatClientService.getResponse(
-                            Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(fileResource)).flashcards();
+                                    Flashcards.class, flashcardsPrompt, utilityService.convertPdfToText(fileResource))
+                            .flashcards();
                     default -> throw new IllegalStateException("Unexpected option value: " + option);
                 };
             }
