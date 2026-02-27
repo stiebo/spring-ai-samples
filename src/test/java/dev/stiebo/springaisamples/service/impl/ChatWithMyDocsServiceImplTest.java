@@ -141,8 +141,6 @@ class ChatWithMyDocsServiceImplTest {
     @Test
     void testDeleteDocumentCallsJdbcClientDeleteUpdate() {
         String docName = "file_to_delete.pdf";
-        JdbcClient.StatementSpec statementSpecMock = mock(JdbcClient.StatementSpec.class); // Assuming StatementSpec is the correct type returned by jdbcClient.sql(...)
-        JdbcClient.MappedQuerySpec<Boolean> mappedQuerySpecMock = mock(JdbcClient.MappedQuerySpec.class); // Specify Boolean as the type parameter
 
         when(jdbcClient.sql(anyString())
                 .param(anyString(), eq(docName))

@@ -84,16 +84,16 @@ public class FlashcardController {
     @Operation(summary = "Create Flashcards",
             description = """
                     Generates study flashcards from text (pdf) or image files with AI.
-                    Image files will be analyzed using multimodal GPT.
+                    Image files will be analyzed using multimodal AI.
                     For PDF files, an option parameter (1, 2, or 3) can be provided to specify the processing method.
                     (default: 3)
-                    
+
                     Option 1: convert pdf to list of images and call AI once for entire pdf using multimodal.
                     -> creates much shorter Q&A but is faster
-                    
+
                     Option 2: convert pdf to images and call AI separately for each image (1 image per page)
                     -> creates longer Q&A but is way slower and more expensive
-                    
+
                     Option 3: convert pdf to text-only
                     -> creates longer Q&A but only works if pdf is text-based and ignores embedded images
                     """)
@@ -113,7 +113,7 @@ public class FlashcardController {
                     ))
     })
     @PostMapping(value = "/createFlashcards", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<Flashcard> createFlashcards(@RequestParam(value = "file", required = false)
+    public List<Flashcard> createFlashcards(@RequestParam("file")
                                             @NotEmptyFile MultipartFile file,
                                             @RequestParam(value = "option", required = false, defaultValue = "3")
                                             int option) {

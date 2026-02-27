@@ -47,8 +47,8 @@ public class AnalyzeEntityServiceImpl implements AnalyzeEntityService {
     public ResponseEntity<byte[]> analyzeEntitiesXls(FileResource fileResource) {
         confirmXlsFileType(fileResource);
         // Step 1: Read the Excel file from the resource input stream
-        try (InputStream inputStream = fileResource.resource().getInputStream()) {
-            Workbook workbook = new XSSFWorkbook(inputStream);
+        try (InputStream inputStream = fileResource.resource().getInputStream();
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
             // assuming first sheet is the one we are looking for
             Sheet sheet = workbook.getSheetAt(0);
 
@@ -97,7 +97,6 @@ public class AnalyzeEntityServiceImpl implements AnalyzeEntityService {
             // Step 5: Write the updated Excel file to a byte array
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
-            workbook.close();
 
             byte[] updatedFile = outputStream.toByteArray();
 

@@ -13,12 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.ai.model.Media;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -55,10 +53,8 @@ class FlashcardServiceImplTest {
         MultipartFile file = new MockMultipartFile("file", "test" + fileExtension,
                 contentType, new byte[0]);
         Flashcards flashcards = new Flashcards(List.of(new Flashcard("Question1", "Answer1")));
-        Resource mockImageFileResource = new ByteArrayResource("mockResource".getBytes());
         String mockPdfText = "PdfText";
         FileResource fileResource = mapper.multipartFileToFileResource(file);
-        List<Media> media = List.of(new Media(MimeTypeUtils.parseMimeType(contentType), fileResource.resource()));
 
         when(utilityService.convertPdfToText(fileResource)).thenReturn(mockPdfText);
         when(chatClientService.getResponse(eq(Flashcards.class), eq(mockFlashcardsCsvPrompt), anyList()))

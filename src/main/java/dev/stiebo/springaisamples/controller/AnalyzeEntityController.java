@@ -1,9 +1,7 @@
 package dev.stiebo.springaisamples.controller;
 
 import dev.stiebo.springaisamples.dto.EntityDetails;
-import dev.stiebo.springaisamples.dto.Flashcard;
 import dev.stiebo.springaisamples.exception.ErrorResponse;
-import dev.stiebo.springaisamples.exception.ValidationErrorResponse;
 import dev.stiebo.springaisamples.model.Mapper;
 import dev.stiebo.springaisamples.service.AnalyzeEntityService;
 import dev.stiebo.springaisamples.validation.NotEmptyFile;
